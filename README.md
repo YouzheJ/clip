@@ -1,5 +1,4 @@
-# create-gulp
-基于gulp的简单脚手架
+# 在线抠图demo
 
 #### 项目结构
 
