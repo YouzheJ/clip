@@ -19,32 +19,50 @@ var Clipping = function () {
 }
 
 Clipping.prototype.init = function () {
-  this.pattern = this.getBGPattern(this.context);
   this.drawBG();
-  this.getPainter();
-  var that = this;
-  this.drawImg(function () {
-    that.painterContext.globalCompositeOperation = 'destination-out';
-  
-    that.drawRect(that.painterContext, 'rgba(0,0,0,1)', 500, 500, 300, 300);
-    that.context.drawImage(that.painterCanvas, 0, 0, that.width, that.height);
-  });
-
+  var layer = this.createLayer();
+  this.painterCanvas = layer.canvas;
+  this.painterContext = layer.context;
+  this.drawImg(this.clearImgByPath.bind(this));
 }
 
+/**
+ * 绘制矩形
+ * @param {context} context canvas的context
+ * @param {string} color 颜色值（rgb|hex）
+ * @param {number} startX 起点横坐标
+ * @param {number} startY 起点纵坐标
+ * @param {number} width 宽
+ * @param {number} height 高
+ */
 Clipping.prototype.drawRect = function (context, color, startX, startY, width, height) {
   context.fillStyle = color;
   context.fillRect(startX, startY, width, height);
 }
 
+/**
+ * 创建图层
+ * @param {?number} width 
+ * @param {?number} height 
+ */
+Clipping.prototype.createLayer = function (width, height) {
+  var canvas = document.createElement('canvas');
+  canvas.width = width || this.width;
+  canvas.height = height || this.height;
+  var context = canvas.getContext('2d');
+  return {
+    canvas: canvas,
+    context: context
+  }
+}
+
 // 绘制栅格化背景
 Clipping.prototype.getBGPattern = function (context) {
-  var bgItemWidth =10, bgItemHeight = 10;
+  var bgItemWidth = 10, bgItemHeight = 10;
   var colorGray = '#d6d6d6', colorWihte = '#fff';
-  var bgItemCanvas = document.createElement('canvas');
-  bgItemCanvas.width = 2 * bgItemWidth;
-  bgItemCanvas.height = 2 * bgItemHeight;
-  bgItemContext = bgItemCanvas.getContext('2d');
+  var layer = this.createLayer(2 * bgItemWidth, 2 * bgItemHeight);
+  var bgItemCanvas = layer.canvas;
+  var bgItemContext = layer.context;
 
   this.drawRect(bgItemContext, colorGray, 0, 0, bgItemWidth, bgItemHeight);
   this.drawRect(bgItemContext, colorWihte, bgItemWidth, 0, bgItemWidth, bgItemHeight);
@@ -54,14 +72,7 @@ Clipping.prototype.getBGPattern = function (context) {
 }
 
 Clipping.prototype.drawBG = function () {
-  this.drawRect(this.context, this.pattern, 0, 0, this.width, this.height)
-}
-
-Clipping.prototype.getPainter = function () {
-  this.painterCanvas = document.createElement('canvas');
-  this.painterCanvas.width = this.width;
-  this.painterCanvas.height = this.height;
-  this.painterContext = this.painterCanvas.getContext('2d');
+  this.drawRect(this.context, this.getBGPattern(this.context), 0, 0, this.width, this.height)
 }
 
 Clipping.prototype.getImg = function (url, cb) {
@@ -70,15 +81,31 @@ Clipping.prototype.getImg = function (url, cb) {
   img.onload = function () {
     cb && cb(img);
   }
+  img.onerror = function () {
+    alert('获取图片失败，请更换图片');
+  }
 }
 
-// TODO: 根据图片大小显示，超大按最大显示
+//TODO: 根据图片大小显示，超大按最大显示
 Clipping.prototype.drawImg = function (cb) {
   var that = this;
   this.getImg('./images/IMGP3122.jpg', function (img) {
     that.painterContext.drawImage(img, 0, 0, that.width, that.height);
     cb && cb();
   });
+}
+
+Clipping.prototype.clearImgByPath = function () {
+  this.painterContext.globalCompositeOperation = 'destination-out';
+
+  var layer = this.createLayer();
+  this.pathCanvas = layer.canvas;
+  this.pathContext = layer.context;
+  //TODO: 使用鼠标绘制路径
+  this.drawRect(this.pathContext, 'rgba(0,0,0,1)', 500, 500, 300, 300);
+  this.painterContext.drawImage(this.pathCanvas, 0, 0, this.width, this.height);
+
+  this.context.drawImage(this.painterCanvas, 0, 0, this.width, this.height);
 }
 
 var clip = new Clipping();
