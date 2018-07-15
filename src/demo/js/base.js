@@ -57,14 +57,20 @@ var Base = (function () {
     var clientHeight = document.body.clientHeight;
     this.width = config.width || clientWidth;
     this.height = config.height || clientHeight;
-
+    this.id = config.id || 'canvas';
+  }
+  
+  _Base.prototype.init = function () {
     this.canvas = document.createElement('canvas');
-    this.canvas.id = config.id || 'canvas';
+    this.canvas.id = this.id;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
-
+    this.context = this.canvas.getContext('2d');
+  
     // 绘制到真实canvas前，先绘制到虚拟canvas
     this.preDrawLayer = this.createLayer();
+
+    document.body.appendChild(this.canvas);
   }
 
   /**
