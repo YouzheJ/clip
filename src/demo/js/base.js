@@ -65,6 +65,12 @@ var Base = (function () {
     this.canvas.id = this.id;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+
+    if (!this.canvas.getContext) {
+      throw new Error('您的浏览器不支持canvas！');
+      // return false;
+    }
+
     this.context = this.canvas.getContext('2d');
   
     // 绘制到真实canvas前，先绘制到虚拟canvas
