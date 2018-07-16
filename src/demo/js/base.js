@@ -41,8 +41,8 @@ var Base = (function () {
       for (var i = 0, len = queue.length; i < len; i++) {
         //根据每个事件的返回值决定是否要往下执行
         // 返回true停止往下走，即阻止冒泡
-        var func = queue[i];
-        if (func && func({
+        var item = queue[i];
+        if (item && item.func && item.func({
           x: e.offsetX,
           y: e.offsetY,
           originEvent: e
@@ -77,6 +77,7 @@ var Base = (function () {
     this.preDrawLayer = this.createLayer();
 
     document.body.appendChild(this.canvas);
+    this.addMouseEvent();
   }
 
   /**
@@ -103,12 +104,14 @@ var Base = (function () {
   /**
    * 绘制直线
    * @param {context} context 
+   * @param {string} color 颜色值（rgb|hex）
    * @param {number} startX 
    * @param {number} startY 
    * @param {number} endX 
    * @param {number} endY 
    */
-  _Base.prototype.drwaLine = function (context, startX, startY, endX, endY) {
+  _Base.prototype.drwaLine = function (context, color, startX, startY, endX, endY) {
+    context.strokeStyle = color;
     context.moveTo(startX, startY);
     context.lineTo(endX, endY);
   }
