@@ -12,6 +12,7 @@ var Path = function (config) {
   this.lineStyle = '#00ffff'; // 线的颜色
   this.layer = this.createLayer();
   this.addEventListener(this.layer, 'click', this.onClick.bind(this));
+  this.addEventListener(this.layer, 'mousemove', this.onMousemove.bind(this));
 }
 
 Path.prototype = new Base();
@@ -31,6 +32,11 @@ Path.prototype.onClick = function (e) {
     return true;
   }
   this.updateProp && this.updateProp();
+}
+
+// 鼠标移入
+Path.prototype.onMousemove = function (e) {
+  console.log(e)
 }
 
 Path.prototype.drawPoint = function (x, y) {

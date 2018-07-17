@@ -7,7 +7,7 @@ var Base = (function () {
   var layerIdLevelMap = {}; // 记录各图层的id和层级顺序
   var layerIdList = []; // 记录各图层的id列表，用于新增层时判断id是否重复
   var layerLevelIterator = 0; // 当前绘制层的id迭代器
-  var eventNameList = [ // 当前支持的事件列表
+  var eventNameList = [ // 当前支持的事件列表， 注意这些事件都是针对整个canvas的
     'click',
     'dbclick',
     'rightclick',
@@ -158,6 +158,8 @@ var Base = (function () {
   }
 
   // 添加各种鼠标事件
+  // 注意，这些事件都是针对整个canvas的
+  // 例如要实现图层hover效果，就要在mouseover中自行实现
   _Base.prototype.addMouseEvent = function () {
     var element = document.getElementById(this.canvas.id);
     eventNameList.map(function (name) {
