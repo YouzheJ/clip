@@ -4,14 +4,20 @@
 var Path = function (config) {
   if (!config) config = {};
   this.pathList = [];
-  this.maxDistance = 10; // 两点间的最大距离，判断是否需要闭合路径
+  this.maxDistance = 14; // 两点间的最大距离，判断是否需要闭合路径
+  this.pointRadius = 3; // 点的半径
+  this.pointStyle = '#0077e6'; // 点的颜色
+  this.lineStyle = '#00ffff'; // 线的颜色
   this.layer = this.createLayer();
   this.addListener(this.layer, 'click', function (e) {
     this.pathList.push({
       x: e.x,
       y: e.y
     });
+    // 清除之前绘制的所有
     this.layer.context.clearRect(0, 0, this.width, this.height);
+
+    // 绘制内容
     if (this.draw()) {
       config.close && config.close(this.pathList);
       return true;
@@ -22,10 +28,19 @@ var Path = function (config) {
 
 Path.prototype = new Base();
 
-Path.prototype.draw = function () {
+Path.prototype.drawPoint = function (x, y) {
+  this.layer.context.beginPath();
+  this.layer.context.arc(x, y, this.pointRadius, 0, Math.PI * 2, true);
+  this.layer.context.closePath();
+  this.layer.context.fillStyle = this.pointStyle;
+  this.layer.context.fill();
+}
+
+// 将所有点绘制成路径
+Path.prototype.drawAllLine = function () {
   var isClose = false;
   this.layer.context.beginPath();
-  this.layer.context.strokeStyle = 'red';
+  this.layer.context.strokeStyle = this.lineStyle;
   // this.layer.context.lineWidth = 10;
   if (this.pathList.length < 2) return isClose;
   for (var i = 0, len = this.pathList.length; i < len - 1; i++) {
@@ -43,6 +58,19 @@ Path.prototype.draw = function () {
     isClose = true;
   }
   this.layer.context.stroke();
+  return isClose;
+}
+
+// 绘制路径的所有点
+Path.prototype.drawAllPoint = function () {
+  this.pathList.map(function (item) {
+    this.drawPoint(item.x, item.y);
+  }.bind(this));
+}
+
+Path.prototype.draw = function () {
+  var isClose = this.drawAllLine();
+  this.drawAllPoint();
   return isClose;
 }
 
