@@ -55,6 +55,22 @@ var Base = (function () {
     }
   }
 
+  /**
+   * 节流函数
+   * @param {function} func 
+   * @param {function} func 
+   */
+  function throttle (func, time) {
+    var timer = null, throttleTime = time || 30; 
+    return function () {
+      if (timer) return;
+      typeof func === 'function' && func.apply(this, arguments);
+      timer = setTimeout(function () {
+        timer = null;
+      }, throttleTime);
+    }
+  }
+
   var _Base = function (config) {
     if (!config) config = {};
     var clientWidth = document.body.clientWidth;
@@ -164,8 +180,8 @@ var Base = (function () {
     var element = document.getElementById(this.canvas.id);
     eventNameList.map(function (name) {
       //TODO 兼容非addEventListener
-      element.addEventListener(name, executeQueue(name));
-    }.bind(this));
+      element.addEventListener(name, throttle(executeQueue(name)));
+    });
   }
 
   /**
