@@ -13,6 +13,9 @@ var Path = function (config) {
   this.lineWidth = 3; // 路径的宽
   this.layer = this.createLayer();
   this.judgeLayer = this.createLayer();
+  this.ctx = this.layer.context;
+  this.judgeCtx = this.judgeLayer.context;
+
   this.addEventListener(this.layer, 'click', this.onClick.bind(this));
   this.addEventListener(this.layer, 'mousemove', this.onMousemove.bind(this));
 
@@ -20,14 +23,9 @@ var Path = function (config) {
 
 Path.prototype = new Base();
 
-// 点击事件
-Path.prototype.onClick = function (e) {
-  this.pathList.push({
-    x: e.x,
-    y: e.y
-  });
+Path.prototype.drawAndUpdate = function () {
   // 清除之前绘制的所有
-  this.layer.context.clearRect(0, 0, this.width, this.height);
+  this.ctx.clearRect(0, 0, this.width, this.height);
 
   // 绘制内容
   if (this.draw()) {
@@ -37,22 +35,44 @@ Path.prototype.onClick = function (e) {
   this.updateProp && this.updateProp();
 }
 
+// 点击事件
+Path.prototype.onClick = function (e) {
+  this.pathList.push({
+    x: e.x,
+    y: e.y,
+    inLine: false,
+    inPoint: false,
+    type: 'line',
+  });
+  return this.drawAndUpdate();
+}
+
 // 鼠标移入
 Path.prototype.onMousemove = function (e) {
   // 按线段进行判断
+  // this.ctx.clearRect(0, 0, this.width, this.height);
   for (var i = 0, len = this.pathList.length; i < len; i++) {
     var mousePoint = {x: e.x, y: e.y};
     var item = this.pathList[i];
+    item.inLine = false;
+    item.inPoint = false;
     var nextItem = this.pathList[i + 1];
+    if (nextItem) {
+      nextItem.inLine = false;
+      nextItem.inPoint = false;
+    }
     if (this.isInPoint(mousePoint, item)) {
-      console.log(mousePoint, i)
+      item.inPoint = true;
+      this.drawAndUpdate();
       return true;
     }
     if (i < this.pathList.length - 1 && this.isInLine(mousePoint, item, nextItem)) {
-      console.log(mousePoint, i)
+      item.inLine = true;
+      this.drawAndUpdate();
       return true;
     }
   }
+  this.drawAndUpdate();
 }
 
 /**
@@ -62,14 +82,13 @@ Path.prototype.onMousemove = function (e) {
  * @param {*} nextItem 
  */
 Path.prototype.isInLine = function (point, item, nextItem) {
-  var ctx = this.judgeLayer.context;
-  ctx.lineWidth = this.lineWidth;
-  ctx.beginPath();
-  ctx.moveTo(item.x, item.y);
-  ctx.lineTo(nextItem.x, nextItem.y);
-  ctx.stroke();
-  ctx.closePath();
-  return ctx.isPointInStroke(point.x, point.y);
+  this.judgeCtx.lineWidth = this.lineWidth;
+  this.judgeCtx.beginPath();
+  this.judgeCtx.moveTo(item.x, item.y);
+  this.judgeCtx.lineTo(nextItem.x, nextItem.y);
+  this.judgeCtx.stroke();
+  this.judgeCtx.closePath();
+  return this.judgeCtx.isPointInStroke(point.x, point.y);
 }
 
 /**
@@ -78,52 +97,55 @@ Path.prototype.isInLine = function (point, item, nextItem) {
  * @param {*} item 
  */
 Path.prototype.isInPoint = function (point, item) {
-  var ctx = this.judgeLayer.context;
-  ctx.beginPath();
-  ctx.arc(item.x, item.y, this.pointRadius, 0, Math.PI * 2, true);
-  ctx.closePath();
-  ctx.fill();
-  return ctx.isPointInPath(point.x, point.y);
+  this.judgeCtx.beginPath();
+  this.judgeCtx.arc(item.x, item.y, this.pointRadius, 0, Math.PI * 2, true);
+  this.judgeCtx.closePath();
+  this.judgeCtx.fill();
+  return this.judgeCtx.isPointInPath(point.x, point.y);
 }
 
-Path.prototype.drawPoint = function (x, y, radius) {
-  var r = radius || this.pointRadius;
-  this.layer.context.beginPath();
-  this.layer.context.arc(x, y, r, 0, Math.PI * 2, true);
-  this.layer.context.closePath();
-  this.layer.context.fillStyle = this.pointStyle;
-  this.layer.context.fill();
+Path.prototype.drawPoint = function (x, y, inPoint) {
+  var r = (!!inPoint ? 2 : 1) * this.pointRadius;
+  this.ctx.beginPath();
+  this.ctx.arc(x, y, r, 0, Math.PI * 2, true);
+  this.ctx.closePath();
+  this.ctx.fillStyle = this.pointStyle;
+  this.ctx.fill();
 }
 
 // 将所有点绘制成路径
 Path.prototype.drawAllLine = function () {
   var isClose = false;
-  this.layer.context.beginPath();
-  this.layer.context.strokeStyle = this.lineStyle;
-  this.layer.context.lineWidth = this.lineWidth;
+  this.ctx.strokeStyle = this.lineStyle;
   if (this.pathList.length < 2) return isClose;
   for (var i = 0, len = this.pathList.length; i < len - 1; i++) {
     var item = this.pathList[i];
     var nextItem = this.pathList[i + 1];
-    this.layer.context.moveTo(item.x, item.y);
-    this.layer.context.lineTo(nextItem.x, nextItem.y);
+    this.ctx.beginPath();
+    this.ctx.lineWidth =  (!!item.inLine ? 2 : 1) * this.lineWidth;
+    this.ctx.moveTo(item.x, item.y);
+    this.ctx.lineTo(nextItem.x, nextItem.y);
+    this.ctx.closePath();
+    this.ctx.stroke();
   }
   var firstItem = this.pathList[0];
   var lastItem = this.pathList[i];
   if (this.getDistance(firstItem, lastItem) < this.maxDistance) {
-    this.layer.context.moveTo(lastItem.x, lastItem.y);
-    this.layer.context.lineTo(firstItem.x, firstItem.y);
-    this.layer.context.closePath();
+    this.ctx.beginPath();
+    this.ctx.lineWidth = (!!lastItem.inLine ? 2 : 1) * this.lineWidth;
+    this.ctx.moveTo(lastItem.x, lastItem.y);
+    this.ctx.lineTo(firstItem.x, firstItem.y);
+    this.ctx.closePath();
+    this.ctx.stroke();
     isClose = true;
   }
-  this.layer.context.stroke();
   return isClose;
 }
 
 // 绘制路径的所有点
 Path.prototype.drawAllPoint = function () {
   this.pathList.map(function (item) {
-    this.drawPoint(item.x, item.y);
+    this.drawPoint(item.x, item.y, item.inPoint);
   }.bind(this));
 }
 
