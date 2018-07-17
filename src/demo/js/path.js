@@ -10,9 +10,12 @@ var Path = function (config) {
   this.pointRadius = 3; // 点的半径
   this.pointStyle = '#0077e6'; // 点的颜色
   this.lineStyle = '#00ffff'; // 线的颜色
+  this.lineWidth = 3; // 路径的宽
   this.layer = this.createLayer();
+  this.judgeLayer = this.createLayer();
   this.addEventListener(this.layer, 'click', this.onClick.bind(this));
   this.addEventListener(this.layer, 'mousemove', this.onMousemove.bind(this));
+
 }
 
 Path.prototype = new Base();
@@ -36,12 +39,57 @@ Path.prototype.onClick = function (e) {
 
 // 鼠标移入
 Path.prototype.onMousemove = function (e) {
-  console.log(e)
+  // 按线段进行判断
+  for (var i = 0, len = this.pathList.length; i < len; i++) {
+    var mousePoint = {x: e.x, y: e.y};
+    var item = this.pathList[i];
+    var nextItem = this.pathList[i + 1];
+    if (this.isInPoint(mousePoint, item)) {
+      console.log(mousePoint, i)
+      return true;
+    }
+    if (i < this.pathList.length - 1 && this.isInLine(mousePoint, item, nextItem)) {
+      console.log(mousePoint, i)
+      return true;
+    }
+  }
 }
 
-Path.prototype.drawPoint = function (x, y) {
+/**
+ * 判断点是否在某一段路径上
+ * @param {*} mousePoint 
+ * @param {*} item 
+ * @param {*} nextItem 
+ */
+Path.prototype.isInLine = function (point, item, nextItem) {
+  var ctx = this.judgeLayer.context;
+  ctx.lineWidth = this.lineWidth;
+  ctx.beginPath();
+  ctx.moveTo(item.x, item.y);
+  ctx.lineTo(nextItem.x, nextItem.y);
+  ctx.stroke();
+  ctx.closePath();
+  return ctx.isPointInStroke(point.x, point.y);
+}
+
+/**
+ * 判断点是否在点上
+ * @param {*} point 
+ * @param {*} item 
+ */
+Path.prototype.isInPoint = function (point, item) {
+  var ctx = this.judgeLayer.context;
+  ctx.beginPath();
+  ctx.arc(item.x, item.y, this.pointRadius, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.fill();
+  return ctx.isPointInPath(point.x, point.y);
+}
+
+Path.prototype.drawPoint = function (x, y, radius) {
+  var r = radius || this.pointRadius;
   this.layer.context.beginPath();
-  this.layer.context.arc(x, y, this.pointRadius, 0, Math.PI * 2, true);
+  this.layer.context.arc(x, y, r, 0, Math.PI * 2, true);
   this.layer.context.closePath();
   this.layer.context.fillStyle = this.pointStyle;
   this.layer.context.fill();
@@ -52,7 +100,7 @@ Path.prototype.drawAllLine = function () {
   var isClose = false;
   this.layer.context.beginPath();
   this.layer.context.strokeStyle = this.lineStyle;
-  // this.layer.context.lineWidth = 10;
+  this.layer.context.lineWidth = this.lineWidth;
   if (this.pathList.length < 2) return isClose;
   for (var i = 0, len = this.pathList.length; i < len - 1; i++) {
     var item = this.pathList[i];
