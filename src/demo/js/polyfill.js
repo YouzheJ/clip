@@ -5,10 +5,12 @@
    * @param {function} func 
    */
   if (!Array.prototype.map) {
-    Array.prototype.map = function (list, func) {
+    Array.prototype.map = function (func) {
+      var newList = [], list = this;
       for (var i = 0, len = list.length; i < len; i++) {
-        func(list[i], i);
+        newList.push(func(list[i], i));
       }
+      return newList;
     }
   }
 })();

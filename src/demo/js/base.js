@@ -7,19 +7,23 @@ var Base = (function () {
   var layerIdLevelMap = {}; // 记录各图层的id和层级顺序
   var layerIdList = []; // 记录各图层的id列表，用于新增层时判断id是否重复
   var layerLevelIterator = 0; // 当前绘制层的id迭代器
-  var eventQueue = {
-    // 事件队列对象，key为各种事件
-    // 图层的层级大的在前面
-    'click': [],
-    'dbclick': [],
-    'rightclick': [],
-    'mouseup': [],
-    'mousedown': [],
-    'mousemove': [],
-    'mouseover': [],
-    'mouseout': [],
-    'mousewheel': [],
-  };
+  var eventNameList = [ // 当前支持的事件列表
+    'click',
+    'dbclick',
+    'rightclick',
+    'mouseup',
+    'mousedown',
+    'mousemove',
+    'mouseover',
+    'mouseout',
+    'mousewheel',
+  ];
+  var eventQueue = {};
+  // 事件队列对象，key为各种事件
+  // 图层的层级大的在前面
+  eventNameList.map(function (name) {
+    eventQueue[name] = [];
+  });
 
   /**
    * 生成图层id
@@ -156,10 +160,10 @@ var Base = (function () {
   // 添加各种鼠标事件
   _Base.prototype.addMouseEvent = function () {
     var element = document.getElementById(this.canvas.id);
-    element.onclick = this.click;
-    // element.onmousedown = this.mouseDown;
-    // element.onmouseup = this.mouseUp;
-    // element.onmousemove = this.mouseMove;
+    eventNameList.map(function (name) {
+      //TODO 兼容非addEventListener
+      element.addEventListener(name, executeQueue(name));
+    }.bind(this));
   }
 
   /**
@@ -188,12 +192,6 @@ var Base = (function () {
       }
     }
   }
-
-  /**
-   * 
-   * @param {*} e 
-   */
-  _Base.prototype.click = executeQueue('click');
 
   return _Base;
 })();
