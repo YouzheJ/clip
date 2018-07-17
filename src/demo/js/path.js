@@ -12,7 +12,10 @@ var Path = function (config) {
       y: e.y
     });
     this.layer.context.clearRect(0, 0, this.width, this.height);
-    this.draw();
+    if (this.draw()) {
+      config.close && config.close(this.pathList);
+      return true;
+    }
     config.update && config.update();
   }.bind(this));
 }
@@ -20,10 +23,11 @@ var Path = function (config) {
 Path.prototype = new Base();
 
 Path.prototype.draw = function () {
+  var isClose = false;
   this.layer.context.beginPath();
   this.layer.context.strokeStyle = 'red';
   // this.layer.context.lineWidth = 10;
-  if (this.pathList.length < 2) return false;
+  if (this.pathList.length < 2) return isClose;
   for (var i = 0, len = this.pathList.length; i < len - 1; i++) {
     var item = this.pathList[i];
     var nextItem = this.pathList[i + 1];
@@ -36,8 +40,10 @@ Path.prototype.draw = function () {
     this.layer.context.moveTo(lastItem.x, lastItem.y);
     this.layer.context.lineTo(firstItem.x, firstItem.y);
     this.layer.context.closePath();
+    isClose = true;
   }
   this.layer.context.stroke();
+  return isClose;
 }
 
 Path.prototype.getDistance = function (point1, point2) {

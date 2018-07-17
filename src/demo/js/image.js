@@ -40,6 +40,7 @@ Img.prototype.draw = function (cb) {
     }
     // 居中
     this.layer.context.drawImage(img, (this.width - w) / 2, (this.height - h) / 2, w, h);
+    console.log('image is laoded');
     cb && cb();
   }.bind(this));
 }

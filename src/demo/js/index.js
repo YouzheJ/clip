@@ -7,8 +7,16 @@ var Clipping = function (config) {
   this.path = new Path({
     update: function () {
       this.base.drawLayer([this.bg.layer, this.img.layer, this.path.layer])
+    }.bind(this),
+    close: function (pathList) {
+      this.mask.draw({
+        imgLayer: this.img.layer,
+        pathList: pathList
+      });
+      this.base.drawLayer([this.bg.layer, this.mask.layer, this.path.layer]);
     }.bind(this)
   });
+  this.mask = new Mask();
 }
 
 Clipping.prototype.init = function () {
