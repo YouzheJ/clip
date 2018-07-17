@@ -168,7 +168,7 @@ var Base = (function () {
    * @param {string} eventType 
    * @param {function} eventfunc 
    */
-  _Base.prototype.addListener = function (layerObj, eventType, eventfunc) {
+  _Base.prototype.addEventListener = function (layerObj, eventType, eventfunc) {
     var queue = eventQueue[eventType];
     var level = layerObj.level;
     var eventItem = {

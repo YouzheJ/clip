@@ -3,30 +3,35 @@
  */
 var Path = function (config) {
   if (!config) config = {};
+  this.updateProp = config.update;
+  this.closeProp = config.close;
   this.pathList = [];
   this.maxDistance = 14; // 两点间的最大距离，判断是否需要闭合路径
   this.pointRadius = 3; // 点的半径
   this.pointStyle = '#0077e6'; // 点的颜色
   this.lineStyle = '#00ffff'; // 线的颜色
   this.layer = this.createLayer();
-  this.addListener(this.layer, 'click', function (e) {
-    this.pathList.push({
-      x: e.x,
-      y: e.y
-    });
-    // 清除之前绘制的所有
-    this.layer.context.clearRect(0, 0, this.width, this.height);
-
-    // 绘制内容
-    if (this.draw()) {
-      config.close && config.close(this.pathList);
-      return true;
-    }
-    config.update && config.update();
-  }.bind(this));
+  this.addEventListener(this.layer, 'click', this.onClick.bind(this));
 }
 
 Path.prototype = new Base();
+
+// 点击事件
+Path.prototype.onClick = function (e) {
+  this.pathList.push({
+    x: e.x,
+    y: e.y
+  });
+  // 清除之前绘制的所有
+  this.layer.context.clearRect(0, 0, this.width, this.height);
+
+  // 绘制内容
+  if (this.draw()) {
+    this.closeProp && this.closeProp(this.pathList);
+    return true;
+  }
+  this.updateProp && this.updateProp();
+}
 
 Path.prototype.drawPoint = function (x, y) {
   this.layer.context.beginPath();
