@@ -37,13 +37,22 @@ Path.prototype.drawAndUpdate = function () {
 
 // 点击事件
 Path.prototype.onClick = function (e) {
-  this.pathList.push({
+  var newItem = {
     x: e.x,
     y: e.y,
     inLine: false,
     inPoint: false,
     type: 'line',
-  });
+  };
+  // 判断鼠标是否在线上
+  for (var i = 0, len = this.pathList.length; i < len; i++) {
+    var item = this.pathList[i];
+    if (item.inLine) {
+      this.pathList.splice(i + 1, 0, newItem);
+      return this.drawAndUpdate();
+    }
+  }
+  this.pathList.push(newItem);
   return this.drawAndUpdate();
 }
 
