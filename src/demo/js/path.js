@@ -16,8 +16,13 @@ var Path = function (config) {
   this.ctx = this.layer.context;
   this.judgeCtx = this.judgeLayer.context;
 
+  this.isMouseDown = false;
+  this.isMovePoint = false;
+
   this.addEventListener(this.layer, 'click', this.onClick.bind(this));
   this.addEventListener(this.layer, 'mousemove', this.onMousemove.bind(this));
+  this.addEventListener(this.layer, 'mousedown', this.onMousedown.bind(this));
+  this.addEventListener(this.layer, 'mouseup', this.onMouseup.bind(this));
 
 }
 
@@ -37,11 +42,13 @@ Path.prototype.drawAndUpdate = function () {
 
 // 点击事件
 Path.prototype.onClick = function (e) {
+  if (this.isMovePoint) return;
   var newItem = {
     x: e.x,
     y: e.y,
     inLine: false,
     inPoint: false,
+    isMove: false,
     type: 'line',
   };
   // 判断鼠标是否在线上
@@ -59,19 +66,26 @@ Path.prototype.onClick = function (e) {
 // 鼠标移入
 Path.prototype.onMousemove = function (e) {
   // 按线段进行判断
-  // this.ctx.clearRect(0, 0, this.width, this.height);
   for (var i = 0, len = this.pathList.length; i < len; i++) {
     var mousePoint = {x: e.x, y: e.y};
     var item = this.pathList[i];
     item.inLine = false;
     item.inPoint = false;
+    !this.isMovePoint && (item.isMove = false);
     var nextItem = this.pathList[i + 1];
     if (nextItem) {
       nextItem.inLine = false;
       nextItem.inPoint = false;
+      !this.isMovePoint && (nextItem.isMove = false);
     }
-    if (this.isInPoint(mousePoint, item)) {
+    if (item.isMove || this.isInPoint(mousePoint, item)) {
       item.inPoint = true;
+      if (this.isMouseDown) {
+        this.isMovePoint = true;
+        item.isMove = true;
+        item.x = e.x;
+        item.y = e.y;
+      }
       this.drawAndUpdate();
       return true;
     }
@@ -82,6 +96,18 @@ Path.prototype.onMousemove = function (e) {
     }
   }
   this.drawAndUpdate();
+}
+
+Path.prototype.onMousedown = function (e) {
+  this.isMouseDown = true;
+}
+
+Path.prototype.onMouseup = function (e) {
+  this.isMouseDown = false;
+  setTimeout(function () {
+    // 确保在触发click事件后，再执行
+    this.isMovePoint = false;
+  }.bind(this), 0);
 }
 
 /**
