@@ -140,7 +140,7 @@ Path.prototype.isInPoint = function (point, item) {
 }
 
 Path.prototype.drawPoint = function (x, y, inPoint) {
-  var r = (!!inPoint ? 2 : 1) * this.pointRadius;
+  var r = (!!inPoint ? 3 : 1.6) * this.pointRadius;
   this.ctx.beginPath();
   this.ctx.arc(x, y, r, 0, Math.PI * 2, true);
   this.ctx.closePath();
