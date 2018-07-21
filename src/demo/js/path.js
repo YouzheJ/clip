@@ -7,7 +7,7 @@ var Path = function (config) {
   this.closeProp = config.close;
   this.pathList = [];
   this.maxDistance = 14; // 两点间的最大距离，判断是否需要闭合路径
-  this.pointRadius = 3; // 点的半径
+  this.pointRadius = 5; // 点的半径
   this.pointStyle = '#0077e6'; // 点的颜色
   this.lineStyle = '#00ffff'; // 线的颜色
   this.lineWidth = 3; // 路径的宽
@@ -46,7 +46,7 @@ Path.prototype.onClick = function (e) {
   var newItem = {
     x: e.x,
     y: e.y,
-    inLine: false,
+    inLine: false, 
     inPoint: false,
     isMove: false,
     type: 'line',
@@ -133,14 +133,14 @@ Path.prototype.isInLine = function (point, item, nextItem) {
  */
 Path.prototype.isInPoint = function (point, item) {
   this.judgeCtx.beginPath();
-  this.judgeCtx.arc(item.x, item.y, this.pointRadius, 0, Math.PI * 2, true);
+  this.judgeCtx.arc(item.x, item.y, 2 * this.pointRadius, 0, Math.PI * 2, true);
   this.judgeCtx.closePath();
   this.judgeCtx.fill();
   return this.judgeCtx.isPointInPath(point.x, point.y);
 }
 
 Path.prototype.drawPoint = function (x, y, inPoint) {
-  var r = (!!inPoint ? 3 : 1.6) * this.pointRadius;
+  var r = (!!inPoint ? 2 : 1) * this.pointRadius;
   this.ctx.beginPath();
   this.ctx.arc(x, y, r, 0, Math.PI * 2, true);
   this.ctx.closePath();
