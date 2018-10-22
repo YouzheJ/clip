@@ -1,7 +1,10 @@
+import Base from './base';
+
+
 /**
  * 路径层
  */
-var Path = function (config) {
+const Path = function (config) {
   if (!config) config = {};
   this.updateProp = config.update;
   this.closeProp = config.close;
@@ -195,3 +198,5 @@ Path.prototype.getDistance = function (point1, point2) {
   var y = Math.abs(point1.y - point2.y);
   return Math.sqrt(x * x + y * y);
 }
+
+export default Path;

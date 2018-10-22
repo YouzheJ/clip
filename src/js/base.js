@@ -2,7 +2,7 @@
  * 最基础的类
  * 提供绘制的方法、事件的绑定、图层创建等
  */
-var Base = (function () {
+const Base = (function () {
   // 私有变量
   var layerIdLevelMap = {}; // 记录各图层的id和层级顺序
   var layerIdList = []; // 记录各图层的id列表，用于新增层时判断id是否重复
@@ -163,7 +163,7 @@ var Base = (function () {
     if (!layerObjs || !layerObjs.length) return;
     layerLevelIterator = 0;
     for (var i = 0, len = layerObjs.length; i < len; i++) {
-      layerItem = layerObjs[i];
+      const layerItem = layerObjs[i];
       if (!layerItem) continue;
       layerLevelIterator++;
       layerIdLevelMap[layerItem.id] = layerLevelIterator;
@@ -213,3 +213,6 @@ var Base = (function () {
 
   return _Base;
 })();
+
+
+export default Base;

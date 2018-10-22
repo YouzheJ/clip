@@ -1,8 +1,10 @@
+import Base from './base';
+
 /**
  * 绘制图片层
  * @param {string} url 
  */
- var Img = function (url) {
+ const Img = function (url) {
    this.url = url;
   this.layer = this.createLayer();
  }
@@ -44,3 +46,5 @@ Img.prototype.draw = function (cb) {
     cb && cb();
   }.bind(this));
 }
+
+export default Img;

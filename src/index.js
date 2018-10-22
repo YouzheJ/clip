@@ -1,4 +1,10 @@
-var Clipping = function (config) {
+import Base from './js/base';
+import BG from './js/bg';
+import Img from './js/image';
+import Path from './js/path';
+import Mask from './js/mask';
+
+const Clipping = function (config) {
   if (!config) config = {};
   this.url = config.url || '';
   this.base = new Base();

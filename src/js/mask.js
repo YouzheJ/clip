@@ -1,8 +1,10 @@
+import Base from './base';
+
 /**
  * 抠图遮罩层
  */
 
- var Mask = function () {
+const Mask = function () {
   this.layer = this.createLayer();
   this.ctx = this.layer.context;
 }
@@ -28,3 +30,5 @@ Mask.prototype.draw = function (config) {
   this.ctx.fillStyle = 'red';
   this.ctx.fill();
  }
+
+ export default Mask;

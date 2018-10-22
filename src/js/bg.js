@@ -1,7 +1,9 @@
+import Base from './base';
+
 /**
  * 栅格背景
  */
-var BG = function () {
+const BG = function () {
   this.layer = this.createLayer();
   this.draw();
 }
@@ -26,3 +28,5 @@ BG.prototype.getPattern = function (context) {
 BG.prototype.draw = function () {
   this.drawRect(this.layer.context, this.getPattern(this.layer.context), 0, 0, this.width, this.height)
 }
+
+export default BG;
