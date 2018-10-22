@@ -5,18 +5,21 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: {
+      clipjs: './src/clip.js',
+      index: './src/index.js'
+    },
     devtool: 'inline-source-map',
     output: {
-        filename: '[name].[hash].js',
+        filename: '[name].[hash:6].js',
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/'
     },
     module: {
         rules: [
             {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader'],
+                test: /\.less$/,
+                use: ['style-loader', 'css-loader', 'less-loader'],
                 include: path.join(__dirname, 'src'),
                 exclude: /node_modules/
             },
